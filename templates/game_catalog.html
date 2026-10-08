@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Catalog</title>
+      <!-- Bootstrap 5.3 CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" 
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+        crossorigin="anonymous" rel="stylesheet">
+  <!-- External CSS files -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/games.css') }}">
+  <!-- Bootstrap 5.3 JS Bundle CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+          crossorigin="anonymous" defer></script>
+  <!-- External JS files -->
+  <script src="{{ url_for('static', filename='scripts/games.js') }}" defer></script>
+  <!-- Bootstrap Icons CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+<body>
+  <main>
+    <h1 class="text-center my-4 text-primary">Game Catalog</h1>
+    <div class="container">
+      <div class="row gy-5">
+      {# Display a message if there are no games in the catalog #}
+        {% if not games %}
+          <div class="col-12">
+            <p class="text-center">No games available.</p>
+          </div>
+        {% endif %}
+        {# Display the list of games as separate Bootstrap cards #}
+        {% for game in games %}
+        <div class="col-xl-4 col-md-6 col-sm-12">
+          <div class="card my-3 h-100">
+            <div class="card-header bg-primary text-white w-100 text-center">
+              <h3>{{ game.name }}</h3>
+            </div>
+            <div class="card-body bg-light text-dark">
+              <p class="card-text">
+                <span class="px-2 fw-bold bi bi-bookmark" height="16" width="16"></span>
+                <span class="fw-bold">Genre: </span>
+                {{ game.genre.value }}
+              </p>
+              <p class="card-text">
+                <span class="px-2 fw-bold bi bi-speedometer2"></span>
+                <span class="fw-bold">Complexity: </span>
+                {{ game.complexity }}
+              </p>
+              <p class="card-text">
+                <span class="px-2 fw-bold bi bi-people"></span>
+                <span class="fw-bold">Players: </span>
+                {{ game.min_players }} - {{ game.max_players }}
+              </p>
+              <p class="card-text">
+                <span class="px-2 fw-bold bi bi-clock"></span>
+                <span class="fw-bold">Duration: </span>
+                {# Calculate the duration in hours and minutes #}
+                {% set hours = game.duration.seconds // 3600 %}
+                {% set minutes = (game.duration.seconds % 3600) // 60 %}
+                {# Display the duration in a more readable format #}
+                {% if hours == 1 %}
+                  {{ hours }} hour
+                {% elif hours > 1 %}
+                  {{ hours }} hours
+                {% endif %}
+                {% if hours > 0 and minutes > 0 %}
+                  and
+                {% endif %}
+                {% if minutes == 1 %}
+                  {{ minutes }} minute
+                {% elif minutes > 1 %} 
+                  {{ minutes }} minutes
+                {% endif %}
+                {% if hours <= 0 and minutes <= 0 %}
+                  Less than a minute
+                {% endif %}
+              </p>
+              <p class="card-text">
+                <span class="px-2 fw-bold bi bi-calendar3"></span>
+                <span class="fw-bold">Released: </span>
+                {{ game.released.strftime('%B %Y') }}
+              </p>
+              <p class="card-text">{{ game.description }}</p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {# Have the Add a Game button launch a Bootstrap modal with the form inside it #}
+    <div class="text-center my-4 margin-auto">
+      <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#form-modal">
+        Add a Game
+      </button>
+    </div>
+  </main>
+
+  {# Define the add game modal to contain the form #}
+  <div id="form-modal" class="modal {% if form.errors %}show{% endif %}" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title">Add a Game</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="game-form">
+            {# TODO: Create the HTML form from the form object using Jinja #}
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" form="game-form" class="btn btn-primary">Add Game</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# Flashed Messages as Toasts via Bootstrap #}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          {# Map Flask categories to Bootstrap text-bg classes (fallback to primary) #}
+          {% set bg_class = 'text-bg-danger' if category == 'error' 
+                      else ('text-bg-' ~ category if category in ['success', 'warning', 'info', 'primary', 'secondary', 'dark'] 
+                      else 'text-bg-primary') %}
+          
+          <div class="toast align-items-center {{ bg_class }} border-0 show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
+            <div class="d-flex">
+              <div class="toast-body">
+                {{ message }}
+              </div>
+              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+:root {
+    font-family: Helvetica, Arial, sans-serif;
+    --bs-primary: #108020;
+    --bs-primary-rgb: 16, 128, 32;
+}
+
+/* Override the button component variables */
+.btn-primary {
+  --bs-btn-bg: var(--bs-primary);
+  --bs-btn-border-color: var(--bs-primary);
+  --bs-btn-hover-bg: #0c6119; 
+  --bs-btn-hover-border-color: #108020;
+  --bs-btn-active-bg: #0a5a16; 
+  --bs-btn-active-border-color: #108020;
+  
+  /* Optional: Ensure the focus state matches your new color */
+  --bs-btn-focus-shadow-rgb: var(--bs-primary-rgb); 
+}
