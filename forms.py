@@ -69,9 +69,8 @@ class GameForm(FlaskForm):
     max_players = IntegerField('Max Players', validators=[
         InputRequired(), NumberRange(min=1, max=99),
     ])
-
     playtime = IntegerField('Playtime (minutes)', validators=[
-        InputRequired(), NumberRange(min=1, max=1440),
+        InputRequired(), NumberRange(min=1, max=1439),
     ])
 
     release_date = DateField('Release Date', validators=[Optional(), not_in_future])
