@@ -49,9 +49,9 @@ class GameForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(min=1, max=100)])
 
     genre = SelectField(
-    'Genre',
-    choices=[('', 'Select a genre...'), *GameGenre.get_choices()],
-    validators=[InputRequired()],
+        'Genre',
+        choices=[('', 'Select a genre...'), *GameGenre.get_choices()],
+        validators=[InputRequired()],
     )
 
     # min/max are passed as HTML attributes via render_kw, not to the widget itself
