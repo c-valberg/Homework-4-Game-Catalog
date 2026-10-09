@@ -33,4 +33,22 @@ def get_games():
 
 @app.post('/games')
 def post_game():
-    raise NotImplementedError("TODO: Implement this function!")
+    form: GameForm = GameForm()
+    if form.validate_on_submit():
+        game = Game(
+            id=-1,  # placeholder, replaced by catalog.add_game
+            name=form.name.data.strip(),
+            genre=GameGenre.get(form.genre.data),
+            complexity=form.complexity.data,
+            min_players=form.min_players.data,
+            max_players=form.max_players.data,
+            duration=timedelta(minutes=form.playtime.data),  # form is in minutes, model uses timedelta
+            released=form.release_date.data,                 # None if left blank; template guards it
+            description=form.description.data or '',
+        )
+        catalog.add_game(game)
+        flash(f'Added "{game.name}" to the catalog!', 'success')
+        return redirect(url_for('get_games'))  # Post/Redirect/Get
+
+    flash('Please correct the errors in the form.', 'error')
+    return render_template('game_catalog.html', games=catalog.get_games(), form=form), 422
