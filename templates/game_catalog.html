@@ -1,3 +1,15 @@
+{# Renders a label, the field, and any validation errors for one form field #}
+{% macro render_field(field, label, icon=None, css='form-control') %}
+  <label for="{{ field.id }}" class="form-label fw-bold">
+    {% if icon %}<span class="pe-2 bi {{ icon }}"></span>{% endif %}{{ label }}
+  </label>
+  {# Add Bootstrap's is-invalid class when the field has errors #}
+  {{ field(class=css ~ (' is-invalid' if field.errors else '')) }}
+  {% for error in field.errors %}
+    <div class="invalid-feedback">{{ error }}</div>
+  {% endfor %}
+{% endmacro %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -80,7 +92,9 @@
               <p class="card-text">
                 <span class="px-2 fw-bold bi bi-calendar3"></span>
                 <span class="fw-bold">Released: </span>
-                {{ game.released.strftime('%B %Y') }}
+                {% if game.released %}
+                  {{ game.released.strftime('%B %Y') }}
+                {% endif %}
               </p>
               <p class="card-text">{{ game.description }}</p>
             </div>
@@ -107,9 +121,45 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="game-form">
-            {# TODO: Create the HTML form from the form object using Jinja #}
-          </form>
+        <form id="game-form" method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+          {{ render_field(form.name, 'Name') }}
+        </div>
+
+        <div class="mb-3">
+          {{ render_field(form.genre, 'Genre', icon='bi-bookmark', css='form-select') }}
+        </div>
+
+        <div class="mb-3">
+          {{ render_field(form.complexity, 'Complexity', icon='bi-speedometer2', css='form-range') }}
+          <div class="d-flex justify-content-between small text-muted">
+            <span>Light</span><span>Heavy</span>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-6">
+            {{ render_field(form.min_players, 'Min Players', icon='bi-people') }}
+          </div>
+          <div class="col-6">
+            {{ render_field(form.max_players, 'Max Players', icon='bi-people') }}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          {{ render_field(form.playtime, 'Playtime (minutes)', icon='bi-clock') }}
+        </div>
+
+        <div class="mb-3">
+          {{ render_field(form.release_date, 'Release Date (optional)', icon='bi-calendar3') }}
+        </div>
+
+        <div class="mb-3">
+          {{ render_field(form.description, 'Description (optional)') }}
+        </div>
+      </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
